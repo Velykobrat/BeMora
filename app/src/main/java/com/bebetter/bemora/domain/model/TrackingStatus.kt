@@ -1,4 +1,8 @@
 package com.bebetter.bemora.domain.model
 
-class TrackingStatus {
+enum class TrackingStatus {
+    PLANNED,
+    IN_PROGRESS,
+    COMPLETED,
+    DROPPED
 }

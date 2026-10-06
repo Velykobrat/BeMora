@@ -1,4 +1,12 @@
 package com.bebetter.bemora.domain.model
 
-class ContentType {
+enum class ContentType {
+    MOVIE,
+    TV_SERIES,
+    BOOK,
+    AUDIOBOOK,
+    GAME,
+    PODCAST,
+    COMIC,
+    MANGA
 }

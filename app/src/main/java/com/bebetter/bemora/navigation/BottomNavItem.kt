@@ -1,4 +1,9 @@
 package com.bebetter.bemora.navigation
 
-class BottomNavItem {
-}
+import androidx.compose.ui.graphics.vector.ImageVector
+
+data class BottomNavItem(
+    val label: String,
+    val screen: Screen,
+    val icon: ImageVector
+)
