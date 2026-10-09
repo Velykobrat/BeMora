@@ -22,12 +22,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.bebetter.bemora.domain.model.ContentItem
 import com.bebetter.bemora.domain.model.ContentType
 import com.bebetter.bemora.ui.components.SearchResultCard
 
 @Composable
 fun SearchScreen(
-    viewModel: SearchViewModel = viewModel()
+    viewModel: SearchViewModel = viewModel(),
+    onMovieClick: (ContentItem) -> Unit
 ) {
     val uiState = viewModel.uiState
 
@@ -146,7 +148,7 @@ fun SearchScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             items(uiState.results) { item ->
-                SearchResultCard(item)
+                SearchResultCard(item, onClick = { onMovieClick(item) })
             }
         }
     }

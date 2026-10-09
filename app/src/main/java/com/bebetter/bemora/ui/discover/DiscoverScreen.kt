@@ -19,11 +19,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.bebetter.bemora.domain.model.ContentItem
 import com.bebetter.bemora.ui.components.ContentCard
 
 @Composable
 fun DiscoverScreen(
-    viewModel: DiscoverViewModel = viewModel()
+    viewModel: DiscoverViewModel = viewModel(),
+    onMovieClick: (ContentItem) -> Unit
 ) {
     val uiState = viewModel.uiState
 
@@ -73,7 +75,7 @@ fun DiscoverScreen(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(uiState.movies) { item ->
-                ContentCard(item)
+                ContentCard(item, onClick = { onMovieClick(item) })
             }
         }
     }

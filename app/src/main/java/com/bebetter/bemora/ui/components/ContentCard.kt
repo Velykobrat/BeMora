@@ -1,5 +1,6 @@
 package com.bebetter.bemora.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,9 +20,9 @@ import coil.compose.AsyncImage
 import com.bebetter.bemora.domain.model.ContentItem
 
 @Composable
-fun ContentCard(item: ContentItem) {
+fun ContentCard(item: ContentItem, onClick: () -> Unit) {
     Column(
-        modifier = Modifier.width(160.dp)
+        modifier = Modifier.width(160.dp).clickable(onClick = onClick)
     ) {
         AsyncImage(
             model = item.imageUrl,

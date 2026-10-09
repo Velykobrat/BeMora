@@ -6,6 +6,11 @@ import com.bebetter.bemora.domain.model.ContentItem
 
 class ContentRepository {
 
+    suspend fun getMovieDetails(movieId: Int): ContentItem {
+        require(movieId > 0) { "Invalid movie ID" }
+        return TmdbClient.api.getMovieDetails(movieId).toContentItem()
+    }
+
     suspend fun getPopularMovies(): List<ContentItem> {
         val response = TmdbClient.api.getPopularMovies()
 
