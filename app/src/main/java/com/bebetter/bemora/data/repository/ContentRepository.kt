@@ -6,6 +6,14 @@ import com.bebetter.bemora.domain.model.ContentItem
 
 class ContentRepository {
 
+    suspend fun getPopularMovies(): List<ContentItem> {
+        val response = TmdbClient.api.getPopularMovies()
+
+        return response.results.map { movie ->
+            movie.toContentItem()
+        }
+    }
+
     suspend fun searchMovies(
         query: String
     ): List<ContentItem> {

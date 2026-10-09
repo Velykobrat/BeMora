@@ -6,6 +6,9 @@ import retrofit2.http.Query
 
 interface TmdbApi {
 
+    @GET("movie/popular")
+    suspend fun getPopularMovies(): TmdbMovieSearchResponse
+
     @GET("search/movie")
     suspend fun searchMovies(
         @Query("query") query: String

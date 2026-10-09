@@ -8,54 +8,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.bebetter.bemora.domain.model.ContentItem
-import com.bebetter.bemora.domain.model.ContentType
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bebetter.bemora.ui.components.ContentCard
 
 @Composable
-fun DiscoverScreen() {
-
-    val contentItems = listOf(
-        ContentItem(
-            id = "movie_dune_2",
-            title = "Dune: Part Two",
-            imageUrl = "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
-            releaseYear = 2024,
-            rating = 8.5,
-            type = ContentType.MOVIE
-        ),
-        ContentItem(
-            id = "movie_oppenheimer",
-            title = "Oppenheimer",
-            imageUrl = "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
-            releaseYear = 2023,
-            rating = 8.6,
-            type = ContentType.MOVIE
-        ),
-        ContentItem(
-            id = "movie_batman",
-            title = "The Batman",
-            imageUrl = "https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg",
-            releaseYear = 2022,
-            rating = 7.8,
-            type = ContentType.MOVIE
-        ),
-        ContentItem(
-            id = "movie_interstellar",
-            title = "Interstellar",
-            imageUrl = "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
-            releaseYear = 2014,
-            rating = 8.7,
-            type = ContentType.MOVIE
-        )
-    )
+fun DiscoverScreen(
+    viewModel: DiscoverViewModel = viewModel()
+) {
+    val uiState = viewModel.uiState
 
     Column(
         modifier = Modifier
@@ -86,10 +56,23 @@ fun DiscoverScreen() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        if (uiState.isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+        }
+
+        uiState.errorMessage?.let { message ->
+            Text(
+                text = message,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(contentItems) { item ->
+            items(uiState.movies) { item ->
                 ContentCard(item)
             }
         }
