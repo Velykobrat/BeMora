@@ -40,7 +40,11 @@ fun BeMoraNavGraph(
         }
 
         composable(Screen.Library.route) {
-            LibraryScreen()
+            LibraryScreen(onMovieClick = { item ->
+                Screen.MovieDetails.routeFor(item)?.let { route ->
+                    navController.navigate(route)
+                }
+            })
         }
 
         composable(Screen.Profile.route) {
