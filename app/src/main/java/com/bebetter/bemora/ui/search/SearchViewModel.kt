@@ -6,7 +6,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bebetter.bemora.data.repository.ContentRepository
+import com.bebetter.bemora.domain.model.ContentItem
 import com.bebetter.bemora.domain.model.ContentType
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -16,6 +18,7 @@ class SearchViewModel : ViewModel() {
     private val repository = ContentRepository()
 
     private var searchJob: Job? = null
+    private var unfilteredResults: List<ContentItem> = emptyList()
 
     var uiState by mutableStateOf(
         SearchUiState()
@@ -31,6 +34,7 @@ class SearchViewModel : ViewModel() {
         searchJob?.cancel()
 
         if (query.isBlank()) {
+            unfilteredResults = emptyList()
             uiState = uiState.copy(
                 results = emptyList(),
                 isLoading = false,
@@ -50,9 +54,13 @@ class SearchViewModel : ViewModel() {
 
     fun onTypeChange(type: ContentType?) {
         uiState = uiState.copy(
-            selectedType = type
+            selectedType = type,
+            results = filteredResults(type)
         )
     }
+
+    private fun filteredResults(type: ContentType?): List<ContentItem> =
+        if (type == null) unfilteredResults else unfilteredResults.filter { it.type == type }
 
     private suspend fun searchMovies(query: String) {
 
@@ -65,12 +73,16 @@ class SearchViewModel : ViewModel() {
             val results =
                 repository.searchMovies(query)
 
+            unfilteredResults = results
             uiState = uiState.copy(
-                results = results,
+                results = filteredResults(uiState.selectedType),
                 isLoading = false
             )
+        } catch (exception: CancellationException) {
+            throw exception
         } catch (exception: Exception) {
 
+            unfilteredResults = emptyList()
             uiState = uiState.copy(
                 results = emptyList(),
                 isLoading = false,
