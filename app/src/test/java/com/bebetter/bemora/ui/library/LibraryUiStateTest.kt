@@ -55,6 +55,16 @@ class LibraryUiStateTest {
         assertEquals(items, state.visibleItems)
     }
 
+    @Test
+    fun typeFiltersCombineWithQueryAndStatus() {
+        val book = TrackedContentItem(ContentItem("openlibrary_book_OL1W", "Dune", type = ContentType.BOOK), TrackingStatus.COMPLETED)
+        val game = TrackedContentItem(ContentItem("rawg_game_1", "Dune", type = ContentType.GAME), TrackingStatus.COMPLETED)
+        val state = LibraryUiState(listOf(book, game), TrackingStatus.COMPLETED, "dune", selectedType = ContentType.BOOK)
+        assertEquals(listOf(book), state.visibleItems)
+        assertEquals(emptyList<TrackedContentItem>(), state.copy(selectedStatus = TrackingStatus.PLANNED).visibleItems)
+        assertEquals(listOf(book, game), state.copy(selectedType = null).visibleItems)
+    }
+
     private fun movie(
         id: String,
         title: String,

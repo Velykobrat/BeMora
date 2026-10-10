@@ -45,6 +45,20 @@ class LibraryRepositoryTest {
     }
 
     @Test
+    fun booksGamesAndMoviesSurviveRestartAndCanBeUpdatedIndependently() = runBlocking {
+        val book = ContentItem("openlibrary_book_OL1W", "Book", type = ContentType.BOOK)
+        val game = ContentItem("rawg_game_1", "Game", type = ContentType.GAME)
+        val repository = LibraryRepository(preferences)
+        for (item in listOf(movieA, book, game)) repository.save(item, TrackingStatus.PLANNED)
+        val restored = LibraryRepository(preferences)
+        assertEquals(3, restored.items.value.size)
+        restored.save(book, TrackingStatus.COMPLETED)
+        restored.remove(game.id)
+        assertEquals(listOf(TrackedContentItem(movieA, TrackingStatus.PLANNED),
+            TrackedContentItem(book, TrackingStatus.COMPLETED)), LibraryRepository(preferences).items.value)
+    }
+
+    @Test
     fun updatesAndRemovalSurviveRepositoryRecreation() = runBlocking {
         val repository = LibraryRepository(preferences)
         repository.save(movieA, TrackingStatus.PLANNED)

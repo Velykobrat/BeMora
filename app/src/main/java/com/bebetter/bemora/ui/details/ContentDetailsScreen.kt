@@ -27,12 +27,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.bebetter.bemora.domain.model.ContentType
+import com.bebetter.bemora.ui.components.CatalogAttribution
 import com.bebetter.bemora.domain.model.TrackingStatus
 
 @Composable
-fun MovieDetailsScreen(
+fun ContentDetailsScreen(
     onBack: () -> Unit,
-    viewModel: MovieDetailsViewModel = viewModel()
+    viewModel: ContentDetailsViewModel = viewModel()
 ) {
     val uiState = viewModel.uiState
 
@@ -57,10 +59,16 @@ fun MovieDetailsScreen(
             Text(text = message, color = MaterialTheme.colorScheme.error)
         }
 
-        uiState.movie?.let { movie ->
+        if (uiState.errorMessage != null) {
+            TextButton(onClick = viewModel::loadDetails, enabled = !uiState.isLoading && !uiState.isSaving) {
+                Text("Try again")
+            }
+        }
+
+        uiState.content?.let { content ->
             AsyncImage(
-                model = movie.imageUrl,
-                contentDescription = "Poster for ${movie.title}",
+                model = content.imageUrl,
+                contentDescription = "Cover for ${content.title}",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -68,14 +76,19 @@ fun MovieDetailsScreen(
                     .clip(RoundedCornerShape(16.dp))
             )
             Text(
-                text = movie.title,
+                text = content.title,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold
             )
-            Text("Release year: ${movie.releaseYear ?: "Unknown"}")
-            Text("Rating: ${movie.rating ?: "Not rated"}")
-            Text("Type: ${movie.type.name.lowercase().replaceFirstChar { it.uppercase() }}")
-            Text(movie.description?.takeIf { it.isNotBlank() } ?: "No description available")
+            content.subtitle?.let { Text(it) }
+            Text("Release year: ${content.releaseYear ?: "Unknown"}")
+            if (content.type != ContentType.BOOK) {
+                val source = if (content.type == ContentType.GAME) "RAWG" else "TMDB"
+                Text(source + " rating (0–10): " + (content.rating ?: "Not rated"))
+            }
+            CatalogAttribution(listOf(content.type))
+            Text("Type: ${content.type.name.lowercase().replaceFirstChar { it.uppercase() }}")
+            Text(content.description?.takeIf { it.isNotBlank() } ?: "No description available")
 
             Text(
                 text = uiState.trackingStatus?.let {
@@ -90,18 +103,18 @@ fun MovieDetailsScreen(
                     FilterChip(
                         selected = uiState.selectedStatus == status,
                         onClick = { viewModel.onStatusChange(status) },
-                        enabled = !uiState.isSaving,
+                        enabled = !uiState.isSaving && !uiState.isLoading,
                         label = {
                             Text(status.name.lowercase().replace('_', ' ').replaceFirstChar { it.uppercase() })
                         }
                     )
                 }
             }
-            Button(onClick = viewModel::saveToLibrary, enabled = !uiState.isSaving) {
+            Button(onClick = viewModel::saveToLibrary, enabled = !uiState.isSaving && !uiState.isLoading) {
                 Text(if (uiState.isSaving) "Saving..." else if (uiState.trackingStatus == null) "Add to Library" else "Save status")
             }
             if (uiState.trackingStatus != null) {
-                TextButton(onClick = viewModel::removeFromLibrary, enabled = !uiState.isSaving) {
+                TextButton(onClick = viewModel::removeFromLibrary, enabled = !uiState.isSaving && !uiState.isLoading) {
                     Text("Remove from Library")
                 }
             }

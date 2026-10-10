@@ -9,6 +9,17 @@ import org.junit.Test
 
 class ProfileUiStateTest {
     @Test
+    fun statisticsCountEachCatalogSeparately() {
+        val types = listOf(ContentType.MOVIE, ContentType.BOOK, ContentType.GAME)
+        val state = ProfileUiState(types.map { type ->
+            TrackedContentItem(ContentItem(type.name, "Item", type = type), TrackingStatus.COMPLETED)
+        })
+        assertEquals(3, state.total)
+        types.forEach { assertEquals(1, state.typeCounts[it]) }
+        assertEquals(100, state.completedPercentage)
+    }
+
+    @Test
     fun emptyLibraryHasZeroCountsAndPercentage() {
         val state = ProfileUiState()
         assertEquals(0, state.total)
