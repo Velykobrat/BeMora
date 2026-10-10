@@ -1,5 +1,9 @@
 package com.bebetter.bemora.ui.search
 
+import androidx.compose.ui.res.stringResource
+import com.bebetter.bemora.ui.components.localizedError
+import com.bebetter.bemora.R
+import com.bebetter.bemora.ui.components.localizedLabel
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
@@ -47,7 +51,7 @@ fun SearchScreen(
         )
 
         Text(
-            text = "Search",
+            text = stringResource(R.string.search),
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold
         )
@@ -57,12 +61,13 @@ fun SearchScreen(
         )
 
         OutlinedTextField(
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(18.dp),
             value = uiState.query,
             onValueChange = { query ->
                 viewModel.onQueryChange(query)
             },
             label = {
-                Text("Search movies, books, games...")
+                Text(stringResource(R.string.search_movies_books_games))
             },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
@@ -82,7 +87,7 @@ fun SearchScreen(
                     viewModel.onTypeChange(null)
                 },
                 label = {
-                    Text("All")
+                    Text(stringResource(R.string.all))
                 }
             )
 
@@ -92,7 +97,7 @@ fun SearchScreen(
                     viewModel.onTypeChange(ContentType.MOVIE)
                 },
                 label = {
-                    Text("Movies")
+                    Text(stringResource(R.string.movies))
                 }
             )
 
@@ -102,7 +107,7 @@ fun SearchScreen(
                     viewModel.onTypeChange(ContentType.BOOK)
                 },
                 label = {
-                    Text("Books")
+                    Text(stringResource(R.string.books))
                 }
             )
 
@@ -112,7 +117,7 @@ fun SearchScreen(
                     viewModel.onTypeChange(ContentType.GAME)
                 },
                 label = {
-                    Text("Games")
+                    Text(stringResource(R.string.games))
                 }
             )
         }
@@ -131,14 +136,14 @@ fun SearchScreen(
 
         uiState.errorMessage?.let { message ->
             Text(
-                text = message,
+                text = localizedError(message),
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
         }
 
         if (uiState.errorMessage != null) {
-            TextButton(onClick = viewModel::retry) { Text("Try again") }
+            TextButton(onClick = viewModel::retry) { Text(stringResource(R.string.try_again)) }
         }
         CatalogAttribution(uiState.results.map { it.type }.distinct())
 
@@ -149,7 +154,7 @@ fun SearchScreen(
             uiState.results.isEmpty()
         ) {
             Text(
-                text = "No results found",
+                text = stringResource(R.string.no_results_found),
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
         }

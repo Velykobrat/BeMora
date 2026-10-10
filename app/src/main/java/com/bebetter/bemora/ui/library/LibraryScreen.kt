@@ -1,5 +1,8 @@
 package com.bebetter.bemora.ui.library
 
+import androidx.compose.ui.res.stringResource
+import com.bebetter.bemora.R
+import com.bebetter.bemora.ui.components.localizedLabel
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,7 +41,7 @@ fun LibraryScreen(
 
     Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
         Spacer(modifier = Modifier.height(24.dp))
-        Text("Library", fontSize = 32.sp, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.library), fontSize = 32.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(
@@ -46,16 +49,17 @@ fun LibraryScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             FilterChip(selected = uiState.selectedType == null,
-                onClick = { viewModel.onTypeChange(null) }, label = { Text("All types") })
+                onClick = { viewModel.onTypeChange(null) }, label = { Text(stringResource(R.string.all_types)) })
             CatalogId.supportedTypes.forEach { type ->
                 FilterChip(selected = uiState.selectedType == type,
-                    onClick = { viewModel.onTypeChange(type) }, label = { Text(type.label) })
+                    onClick = { viewModel.onTypeChange(type) }, label = { Text(type.localizedLabel()) })
             }
         }
         OutlinedTextField(
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(18.dp),
             value = uiState.query,
             onValueChange = viewModel::onQueryChange,
-            label = { Text("Search your Library") },
+            label = { Text(stringResource(R.string.search_your_library)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
@@ -68,7 +72,7 @@ fun LibraryScreen(
                 FilterChip(
                     selected = uiState.sort == sort,
                     onClick = { viewModel.onSortChange(sort) },
-                    label = { Text(sort.label) }
+                    label = { Text(sort.localizedLabel()) }
                 )
             }
         }
@@ -81,14 +85,14 @@ fun LibraryScreen(
             FilterChip(
                 selected = uiState.selectedStatus == null,
                 onClick = { viewModel.onStatusChange(null) },
-                label = { Text("All") }
+                label = { Text(stringResource(R.string.all)) }
             )
             TrackingStatus.entries.forEach { status ->
                 FilterChip(
                     selected = uiState.selectedStatus == status,
                     onClick = { viewModel.onStatusChange(status) },
                     label = {
-                        Text(status.name.lowercase().replace('_', ' ').replaceFirstChar { it.uppercase() })
+                        Text(status.localizedLabel())
                     }
                 )
             }
@@ -98,9 +102,9 @@ fun LibraryScreen(
         if (visibleItems.isEmpty()) {
             Text(
                 when {
-                    uiState.items.isEmpty() -> "Your Library is empty. Add movies, books or games from Search."
-                    uiState.query.isNotBlank() -> "No items match your search and filters."
-                    else -> "No items match your filters."
+                    uiState.items.isEmpty() -> stringResource(R.string.your_library_is_empty_add_movies_books_or_games_from_search)
+                    uiState.query.isNotBlank() -> stringResource(R.string.no_items_match_your_search_and_filters)
+                    else -> stringResource(R.string.no_items_match_your_filters)
                 }
             )
         }
@@ -111,7 +115,7 @@ fun LibraryScreen(
             items(visibleItems, key = { it.content.id }) { tracked ->
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     SearchResultCard(tracked.content, onClick = { onContentClick(tracked.content) })
-                    Text(tracked.status.name.lowercase().replace('_', ' ').replaceFirstChar { it.uppercase() })
+                    Text(tracked.status.localizedLabel())
                 }
             }
         }

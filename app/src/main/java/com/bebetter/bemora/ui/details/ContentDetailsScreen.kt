@@ -1,5 +1,10 @@
 package com.bebetter.bemora.ui.details
 
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
+import com.bebetter.bemora.ui.components.localizedError
+import com.bebetter.bemora.R
+import com.bebetter.bemora.ui.components.localizedLabel
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,7 +51,7 @@ fun ContentDetailsScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         TextButton(onClick = onBack) {
-            Text("Back")
+            Text(stringResource(R.string.back))
         }
 
         if (uiState.isLoading) {
@@ -56,19 +61,22 @@ fun ContentDetailsScreen(
         }
 
         uiState.errorMessage?.let { message ->
-            Text(text = message, color = MaterialTheme.colorScheme.error)
+            Text(text = localizedError(message), color = MaterialTheme.colorScheme.error)
         }
 
         if (uiState.errorMessage != null) {
             TextButton(onClick = viewModel::loadDetails, enabled = !uiState.isLoading && !uiState.isSaving) {
-                Text("Try again")
+                Text(stringResource(R.string.try_again))
             }
         }
 
         uiState.content?.let { content ->
             AsyncImage(
+            placeholder = painterResource(R.drawable.cover_placeholder),
+            error = painterResource(R.drawable.cover_placeholder),
+            fallback = painterResource(R.drawable.cover_placeholder),
                 model = content.imageUrl,
-                contentDescription = "Cover for ${content.title}",
+                contentDescription = content.title,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -81,19 +89,19 @@ fun ContentDetailsScreen(
                 fontWeight = FontWeight.Bold
             )
             content.subtitle?.let { Text(it) }
-            Text("Release year: ${content.releaseYear ?: "Unknown"}")
+            Text(stringResource(R.string.release_year_1_s, content.releaseYear?.toString() ?: "—"))
             if (content.type != ContentType.BOOK) {
                 val source = if (content.type == ContentType.GAME) "RAWG" else "TMDB"
-                Text(source + " rating (0–10): " + (content.rating ?: "Not rated"))
+                Text(source + " · " + (content.rating?.let { "%.1f / 10".format(it) } ?: "—"))
             }
             CatalogAttribution(listOf(content.type))
-            Text("Type: ${content.type.name.lowercase().replaceFirstChar { it.uppercase() }}")
-            Text(content.description?.takeIf { it.isNotBlank() } ?: "No description available")
+            Text(content.type.localizedLabel())
+            Text(content.description?.takeIf { it.isNotBlank() } ?: stringResource(R.string.no_description_available))
 
             Text(
                 text = uiState.trackingStatus?.let {
-                    "Library status: ${it.name.lowercase().replace('_', ' ').replaceFirstChar { character -> character.uppercase() }}"
-                } ?: "Not in Library"
+                    it.localizedLabel()
+                } ?: stringResource(R.string.not_in_library)
             )
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
@@ -105,21 +113,21 @@ fun ContentDetailsScreen(
                         onClick = { viewModel.onStatusChange(status) },
                         enabled = !uiState.isSaving && !uiState.isLoading,
                         label = {
-                            Text(status.name.lowercase().replace('_', ' ').replaceFirstChar { it.uppercase() })
+                            Text(status.localizedLabel())
                         }
                     )
                 }
             }
             Button(onClick = viewModel::saveToLibrary, enabled = !uiState.isSaving && !uiState.isLoading) {
-                Text(if (uiState.isSaving) "Saving..." else if (uiState.trackingStatus == null) "Add to Library" else "Save status")
+                Text(if (uiState.isSaving) stringResource(R.string.saving) else if (uiState.trackingStatus == null) stringResource(R.string.add_to_library) else stringResource(R.string.save_status))
             }
             if (uiState.trackingStatus != null) {
                 TextButton(onClick = viewModel::removeFromLibrary, enabled = !uiState.isSaving && !uiState.isLoading) {
-                    Text("Remove from Library")
+                    Text(stringResource(R.string.remove_from_library))
                 }
             }
             uiState.libraryErrorMessage?.let { message ->
-                Text(text = message, color = MaterialTheme.colorScheme.error)
+                Text(text = localizedError(message), color = MaterialTheme.colorScheme.error)
             }
         }
     }

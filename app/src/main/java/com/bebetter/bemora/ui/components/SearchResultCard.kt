@@ -1,6 +1,14 @@
 package com.bebetter.bemora.ui.components
 
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
+import com.bebetter.bemora.R
+import com.bebetter.bemora.ui.components.localizedLabel
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,11 +36,14 @@ fun SearchResultCard(
     onClick: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(MaterialTheme.colorScheme.surfaceContainer).clickable(onClick = onClick).padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         AsyncImage(
+            placeholder = painterResource(R.drawable.cover_placeholder),
+            error = painterResource(R.drawable.cover_placeholder),
+            fallback = painterResource(R.drawable.cover_placeholder),
             model = item.imageUrl,
             contentDescription = item.title,
             contentScale = ContentScale.Crop,
@@ -49,6 +60,8 @@ fun SearchResultCard(
         ) {
             Text(
                 text = item.title,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -60,8 +73,10 @@ fun SearchResultCard(
 
                 Text(
                     text = subtitle,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                     fontSize = 14.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -84,8 +99,10 @@ fun SearchResultCard(
                         append(it)
                     }
                 },
-                fontSize = 14.sp,
-                color = Color.Gray
+                maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(
@@ -93,14 +110,9 @@ fun SearchResultCard(
             )
 
             Text(
-                text = item.type.name
-                    .replace("_", " ")
-                    .lowercase()
-                    .replaceFirstChar {
-                        it.uppercase()
-                    },
+                text = item.type.localizedLabel(),
                 fontSize = 12.sp,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
