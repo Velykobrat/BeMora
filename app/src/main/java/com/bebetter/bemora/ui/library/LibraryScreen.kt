@@ -21,13 +21,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.bebetter.bemora.domain.model.CatalogId
+import com.bebetter.bemora.domain.model.label
+import com.bebetter.bemora.ui.components.CatalogAttribution
 import com.bebetter.bemora.domain.model.ContentItem
 import com.bebetter.bemora.domain.model.TrackingStatus
 import com.bebetter.bemora.ui.components.SearchResultCard
 
 @Composable
 fun LibraryScreen(
-    onMovieClick: (ContentItem) -> Unit,
+    onContentClick: (ContentItem) -> Unit,
     viewModel: LibraryViewModel = viewModel()
 ) {
     val uiState = viewModel.uiState
@@ -38,6 +41,17 @@ fun LibraryScreen(
         Text("Library", fontSize = 32.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(16.dp))
 
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            FilterChip(selected = uiState.selectedType == null,
+                onClick = { viewModel.onTypeChange(null) }, label = { Text("All types") })
+            CatalogId.supportedTypes.forEach { type ->
+                FilterChip(selected = uiState.selectedType == type,
+                    onClick = { viewModel.onTypeChange(type) }, label = { Text(type.label) })
+            }
+        }
         OutlinedTextField(
             value = uiState.query,
             onValueChange = viewModel::onQueryChange,
@@ -84,17 +98,19 @@ fun LibraryScreen(
         if (visibleItems.isEmpty()) {
             Text(
                 when {
-                    uiState.items.isEmpty() -> "Your Library is empty. Add movies from their details."
-                    uiState.query.isNotBlank() -> "No movies match your search and status filter."
-                    else -> "No movies with this status."
+                    uiState.items.isEmpty() -> "Your Library is empty. Add movies, books or games from Search."
+                    uiState.query.isNotBlank() -> "No items match your search and filters."
+                    else -> "No items match your filters."
                 }
             )
         }
 
+        CatalogAttribution(visibleItems.map { it.content.type }.distinct())
+
         LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(20.dp)) {
             items(visibleItems, key = { it.content.id }) { tracked ->
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    SearchResultCard(tracked.content, onClick = { onMovieClick(tracked.content) })
+                    SearchResultCard(tracked.content, onClick = { onContentClick(tracked.content) })
                     Text(tracked.status.name.lowercase().replace('_', ' ').replaceFirstChar { it.uppercase() })
                 }
             }

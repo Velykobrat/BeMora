@@ -8,7 +8,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.bebetter.bemora.ui.discover.DiscoverScreen
-import com.bebetter.bemora.ui.details.MovieDetailsScreen
+import com.bebetter.bemora.ui.details.ContentDetailsScreen
 import com.bebetter.bemora.ui.library.LibraryScreen
 import com.bebetter.bemora.ui.profile.ProfileScreen
 import com.bebetter.bemora.ui.search.SearchScreen
@@ -25,23 +25,23 @@ fun BeMoraNavGraph(
     ) {
         composable(Screen.Discover.route) {
             DiscoverScreen(onMovieClick = { item ->
-                Screen.MovieDetails.routeFor(item)?.let { route ->
+                Screen.ContentDetails.routeFor(item)?.let { route ->
                     navController.navigate(route)
                 }
             })
         }
 
         composable(Screen.Search.route) {
-            SearchScreen(onMovieClick = { item ->
-                Screen.MovieDetails.routeFor(item)?.let { route ->
+            SearchScreen(onContentClick = { item ->
+                Screen.ContentDetails.routeFor(item)?.let { route ->
                     navController.navigate(route)
                 }
             })
         }
 
         composable(Screen.Library.route) {
-            LibraryScreen(onMovieClick = { item ->
-                Screen.MovieDetails.routeFor(item)?.let { route ->
+            LibraryScreen(onContentClick = { item ->
+                Screen.ContentDetails.routeFor(item)?.let { route ->
                     navController.navigate(route)
                 }
             })
@@ -52,6 +52,17 @@ fun BeMoraNavGraph(
         }
 
         composable(
+            route = Screen.ContentDetails.route,
+            arguments = listOf(navArgument(Screen.ContentDetails.CONTENT_ID) {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            })
+        ) {
+            ContentDetailsScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(
             route = Screen.MovieDetails.route,
             arguments = listOf(navArgument(Screen.MovieDetails.MOVIE_ID) {
                 type = NavType.StringType
@@ -59,7 +70,7 @@ fun BeMoraNavGraph(
                 defaultValue = null
             })
         ) {
-            MovieDetailsScreen(onBack = { navController.popBackStack() })
+            ContentDetailsScreen(onBack = { navController.popBackStack() })
         }
     }
 }

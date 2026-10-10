@@ -8,6 +8,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.bebetter.bemora.data.local.LibraryRepository
 import com.bebetter.bemora.domain.model.TrackingStatus
+import com.bebetter.bemora.domain.model.ContentType
 import kotlinx.coroutines.launch
 
 class LibraryViewModel(application: Application) : AndroidViewModel(application) {
@@ -31,6 +32,10 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
 
     fun onSortChange(sort: LibrarySort) {
         uiState = uiState.copy(sort = sort)
+    }
+
+    fun onTypeChange(type: ContentType?) {
+        uiState = uiState.copy(selectedType = type)
     }
 
     fun onStatusChange(status: TrackingStatus?) {

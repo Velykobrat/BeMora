@@ -1,5 +1,7 @@
 package com.bebetter.bemora.ui.search
 
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +17,8 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import com.bebetter.bemora.ui.components.CatalogAttribution
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,7 +33,7 @@ import com.bebetter.bemora.ui.components.SearchResultCard
 @Composable
 fun SearchScreen(
     viewModel: SearchViewModel = viewModel(),
-    onMovieClick: (ContentItem) -> Unit
+    onContentClick: (ContentItem) -> Unit
 ) {
     val uiState = viewModel.uiState
 
@@ -69,6 +73,7 @@ fun SearchScreen(
         )
 
         Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             FilterChip(
@@ -132,6 +137,11 @@ fun SearchScreen(
             )
         }
 
+        if (uiState.errorMessage != null) {
+            TextButton(onClick = viewModel::retry) { Text("Try again") }
+        }
+        CatalogAttribution(uiState.results.map { it.type }.distinct())
+
         if (
             uiState.query.isNotBlank() &&
             !uiState.isLoading &&
@@ -145,10 +155,11 @@ fun SearchScreen(
         }
 
         LazyColumn(
+            modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            items(uiState.results) { item ->
-                SearchResultCard(item, onClick = { onMovieClick(item) })
+            items(uiState.results, key = { it.id }) { item ->
+                SearchResultCard(item, onClick = { onContentClick(item) })
             }
         }
     }
