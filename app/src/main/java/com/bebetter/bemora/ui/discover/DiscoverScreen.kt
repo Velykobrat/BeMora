@@ -1,5 +1,9 @@
 package com.bebetter.bemora.ui.discover
 
+import androidx.compose.ui.res.stringResource
+import com.bebetter.bemora.ui.components.localizedError
+import com.bebetter.bemora.R
+import com.bebetter.bemora.ui.components.localizedLabel
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -43,15 +47,15 @@ fun DiscoverScreen(
         )
 
         Text(
-            text = "Find what's next.",
+            text = stringResource(R.string.find_what_s_next),
             fontSize = 16.sp,
-            color = Color.Gray
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(
-            text = "Trending now",
+            text = stringResource(R.string.trending_now),
             fontSize = 22.sp,
             fontWeight = FontWeight.SemiBold
         )
@@ -66,7 +70,7 @@ fun DiscoverScreen(
 
         uiState.errorMessage?.let { message ->
             Text(
-                text = message,
+                text = localizedError(message),
                 color = MaterialTheme.colorScheme.error
             )
         }

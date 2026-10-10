@@ -1,5 +1,8 @@
 package com.bebetter.bemora.ui.profile
 
+import androidx.compose.ui.res.stringResource
+import com.bebetter.bemora.R
+import com.bebetter.bemora.ui.components.localizedLabel
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,20 +29,20 @@ fun ProfileScreen(viewModel: ProfileViewModel = viewModel()) {
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text("Profile", fontSize = 32.sp, fontWeight = FontWeight.Bold)
-        Text("Your Library", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.profile), fontSize = 32.sp, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.your_library), style = MaterialTheme.typography.titleLarge)
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier.padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text("${state.total} items", style = MaterialTheme.typography.headlineMedium)
-                Text("${state.completedPercentage}% completed")
+                Text(stringResource(R.string.label_1_d_items, state.total), style = MaterialTheme.typography.headlineMedium)
+                Text(stringResource(R.string.label_1_d_completed, state.completedPercentage))
             }
         }
         state.typeCounts.forEach { (type, count) ->
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(type.label)
+                Text(type.localizedLabel())
                 Text(count.toString(), fontWeight = FontWeight.Bold)
             }
         }
@@ -49,13 +52,13 @@ fun ProfileScreen(viewModel: ProfileViewModel = viewModel()) {
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(status.name.lowercase().replace('_', ' ').replaceFirstChar { it.uppercase() })
+                    Text(status.localizedLabel())
                     Text(count.toString(), fontWeight = FontWeight.Bold)
                 }
             }
         }
         if (state.total == 0) {
-            Text("Add movies, books or games to your Library to start tracking your progress.")
+            Text(stringResource(R.string.add_movies_books_or_games_to_your_library_to_start_tracking_your_))
         }
     }
 }

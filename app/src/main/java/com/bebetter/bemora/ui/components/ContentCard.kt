@@ -1,6 +1,14 @@
 package com.bebetter.bemora.ui.components
 
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
+import com.bebetter.bemora.R
+import com.bebetter.bemora.ui.components.localizedLabel
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,11 +30,14 @@ import com.bebetter.bemora.domain.model.ContentItem
 @Composable
 fun ContentCard(item: ContentItem, onClick: () -> Unit) {
     Column(
-        modifier = Modifier.width(160.dp).clickable(onClick = onClick)
+        modifier = Modifier.width(172.dp).clip(RoundedCornerShape(20.dp)).background(MaterialTheme.colorScheme.surfaceContainer).clickable(onClick = onClick).padding(10.dp)
     ) {
         AsyncImage(
+            placeholder = painterResource(R.drawable.cover_placeholder),
+            error = painterResource(R.drawable.cover_placeholder),
+            fallback = painterResource(R.drawable.cover_placeholder),
             model = item.imageUrl,
-            contentDescription = "Poster for ${item.title}",
+            contentDescription = item.title,
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
@@ -40,14 +51,15 @@ fun ContentCard(item: ContentItem, onClick: () -> Unit) {
             text = item.title,
             fontWeight = FontWeight.SemiBold,
             fontSize = 16.sp,
-            maxLines = 1
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
 
         Spacer(modifier = Modifier.height(3.dp))
 
         Text(
-            text = "${item.releaseYear ?: ""}  •  ⭐ ${item.rating ?: ""}",
-            color = Color.Gray,
+            text = listOfNotNull(item.releaseYear?.toString(), item.rating?.let { "★ %.1f".format(it) }).joinToString("  ·  "),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 13.sp
         )
     }

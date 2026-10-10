@@ -1,5 +1,8 @@
 package com.bebetter.bemora.navigation
 
+import androidx.compose.ui.res.stringResource
+import com.bebetter.bemora.R
+import com.bebetter.bemora.ui.components.localizedLabel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Explore
@@ -19,22 +22,22 @@ fun BeMoraBottomBar(
 ) {
     val items = listOf(
         BottomNavItem(
-            label = "Discover",
+            label = stringResource(R.string.discover),
             screen = Screen.Discover,
             icon = Icons.Default.Explore
         ),
         BottomNavItem(
-            label = "Search",
+            label = stringResource(R.string.search),
             screen = Screen.Search,
             icon = Icons.Default.Search
         ),
         BottomNavItem(
-            label = "Library",
+            label = stringResource(R.string.library),
             screen = Screen.Library,
             icon = Icons.Default.VideoLibrary
         ),
         BottomNavItem(
-            label = "Profile",
+            label = stringResource(R.string.profile),
             screen = Screen.Profile,
             icon = Icons.Default.AccountCircle
         )
