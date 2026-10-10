@@ -25,4 +25,45 @@ class LibraryUiStateTest {
         assertEquals(items, state.copy(selectedStatus = null).visibleItems)
         assertEquals(emptyList<TrackedContentItem>(), state.copy(items = emptyList()).visibleItems)
     }
+    @Test
+    fun searchCombinesWithStatusAndTrimsWhitespace() {
+        val items = listOf(
+            movie("1", "Arrival", TrackingStatus.COMPLETED),
+            movie("2", "Arrival Again", TrackingStatus.PLANNED),
+            movie("3", "Dune", TrackingStatus.COMPLETED)
+        )
+        val state = LibraryUiState(items, TrackingStatus.COMPLETED, "  ARRIVAL  ")
+        assertEquals(listOf(items[0]), state.visibleItems)
+        assertEquals(emptyList<TrackedContentItem>(), state.copy(query = "missing").visibleItems)
+    }
+
+    @Test
+    fun sortingUsesTitleTieBreakersAndPlacesMissingValuesLast() {
+        val items = listOf(
+            movie("1", "Zulu", year = null, rating = null),
+            movie("2", "beta", year = 2024, rating = 8.0),
+            movie("3", "Alpha", year = 2024, rating = 8.0),
+            movie("4", "Delta", year = 2020, rating = 6.0)
+        )
+        val state = LibraryUiState(items)
+        assertEquals(listOf(items[2], items[1], items[3], items[0]),
+            state.copy(sort = LibrarySort.TITLE).visibleItems)
+        assertEquals(listOf(items[2], items[1], items[3], items[0]),
+            state.copy(sort = LibrarySort.YEAR).visibleItems)
+        assertEquals(listOf(items[2], items[1], items[3], items[0]),
+            state.copy(sort = LibrarySort.RATING).visibleItems)
+        assertEquals(items, state.visibleItems)
+    }
+
+    private fun movie(
+        id: String,
+        title: String,
+        status: TrackingStatus = TrackingStatus.PLANNED,
+        year: Int? = null,
+        rating: Double? = null
+    ) = TrackedContentItem(
+        ContentItem(id = "tmdb_movie_${id}", title = title, type = ContentType.MOVIE,
+            releaseYear = year, rating = rating),
+        status
+    )
 }

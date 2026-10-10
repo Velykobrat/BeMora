@@ -25,6 +25,14 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun onQueryChange(query: String) {
+        uiState = uiState.copy(query = query)
+    }
+
+    fun onSortChange(sort: LibrarySort) {
+        uiState = uiState.copy(sort = sort)
+    }
+
     fun onStatusChange(status: TrackingStatus?) {
         uiState = uiState.copy(selectedStatus = status)
     }

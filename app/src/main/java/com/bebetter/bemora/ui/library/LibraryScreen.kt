@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +38,28 @@ fun LibraryScreen(
         Text("Library", fontSize = 32.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(16.dp))
 
+        OutlinedTextField(
+            value = uiState.query,
+            onValueChange = viewModel::onQueryChange,
+            label = { Text("Search your Library") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            LibrarySort.entries.forEach { sort ->
+                FilterChip(
+                    selected = uiState.sort == sort,
+                    onClick = { viewModel.onSortChange(sort) },
+                    label = { Text(sort.label) }
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
         Row(
             modifier = Modifier.horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -58,10 +82,16 @@ fun LibraryScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         if (visibleItems.isEmpty()) {
-            Text(if (uiState.items.isEmpty()) "Your Library is empty. Add movies from their details." else "No movies with this status.")
+            Text(
+                when {
+                    uiState.items.isEmpty() -> "Your Library is empty. Add movies from their details."
+                    uiState.query.isNotBlank() -> "No movies match your search and status filter."
+                    else -> "No movies with this status."
+                }
+            )
         }
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(20.dp)) {
             items(visibleItems, key = { it.content.id }) { tracked ->
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     SearchResultCard(tracked.content, onClick = { onMovieClick(tracked.content) })
