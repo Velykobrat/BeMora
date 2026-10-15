@@ -24,7 +24,7 @@ fun BeMoraNavGraph(
         modifier = modifier
     ) {
         composable(Screen.Discover.route) {
-            DiscoverScreen(onMovieClick = { item ->
+            DiscoverScreen(onContentClick = { item ->
                 Screen.ContentDetails.routeFor(item)?.let { route ->
                     navController.navigate(route)
                 }

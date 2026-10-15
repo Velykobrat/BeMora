@@ -30,3 +30,12 @@ data class GameDto(
 )
 data class GamePlatformDto(val platform: NamedDto? = null)
 data class NamedDto(val name: String? = null)
+
+data class BookSubjectResponse(val works: List<SubjectBookDto>? = null)
+data class SubjectBookDto(
+    val key: String? = null,
+    val title: String? = null,
+    val authors: List<NamedDto?>? = null,
+    @SerializedName("first_publish_year") val year: Int? = null,
+    @SerializedName("cover_id") val coverId: Long? = null
+)

@@ -59,4 +59,7 @@
     <string name="error_11">Unable to update Library</string>
     <string name="error_12">Unable to load popular movies</string>
     <string name="error_generic">Unable to complete this action. Check your connection and try again.</string>
+    <string name="discover_movies">Popular movies</string>
+    <string name="discover_books">Fiction books</string>
+    <string name="discover_games">Popular games</string>
 </resources>

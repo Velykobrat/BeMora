@@ -22,6 +22,8 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,7 +43,7 @@ fun ContentDetailsScreen(
     onBack: () -> Unit,
     viewModel: ContentDetailsViewModel = viewModel()
 ) {
-    val uiState = viewModel.uiState
+    val uiState by viewModel.uiState.collectAsState()
 
     Column(
         modifier = Modifier
@@ -54,7 +56,7 @@ fun ContentDetailsScreen(
             Text(stringResource(R.string.back))
         }
 
-        if (uiState.isLoading) {
+        if (uiState.isLoading || uiState.isRefreshing) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
@@ -65,7 +67,7 @@ fun ContentDetailsScreen(
         }
 
         if (uiState.errorMessage != null) {
-            TextButton(onClick = viewModel::loadDetails, enabled = !uiState.isLoading && !uiState.isSaving) {
+            TextButton(onClick = viewModel::loadDetails, enabled = !uiState.isLoading && !uiState.isRefreshing && !uiState.isSaving) {
                 Text(stringResource(R.string.try_again))
             }
         }

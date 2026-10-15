@@ -17,10 +17,12 @@ class ContentRepositoryTest {
     }
     private val books = object : OpenLibraryApi {
         override suspend fun search(query: String,fields: String,limit: Int) = BookSearchResponse(listOf(BookDto("/works/OL1W","Book")))
+        override suspend fun subject(subject: String, limit: Int) = BookSubjectResponse()
         override suspend fun work(workId: String) = BookWorkDto(title="Book details")
     }
     private val games = object : RawgApi {
         override suspend fun search(query: String,key: String,pageSize: Int) = GameSearchResponse(listOf(GameDto(id=1,name="Game")))
+        override suspend fun popular(key: String, ordering: String, pageSize: Int) = GameSearchResponse()
         override suspend fun details(gameId: Int,key: String) = GameDto(id=gameId,name="Game details")
     }
     private fun repository(gameKey: String="test",bookApi: OpenLibraryApi=books) =

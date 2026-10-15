@@ -143,7 +143,7 @@ fun SearchScreen(
         }
 
         if (uiState.errorMessage != null) {
-            TextButton(onClick = viewModel::retry) { Text(stringResource(R.string.try_again)) }
+            TextButton(onClick = viewModel::retry, enabled = !uiState.isLoading) { Text(stringResource(R.string.try_again)) }
         }
         CatalogAttribution(uiState.results.map { it.type }.distinct())
 

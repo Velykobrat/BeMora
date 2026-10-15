@@ -59,4 +59,7 @@
     <string name="error_11">Не вдалося оновити бібліотеку.</string>
     <string name="error_12">Не вдалося завантажити популярні фільми.</string>
     <string name="error_generic">Не вдалося виконати дію. Перевір інтернет і спробуй ще раз.</string>
+    <string name="discover_movies">Популярні фільми</string>
+    <string name="discover_books">Художні книги</string>
+    <string name="discover_games">Популярні ігри</string>
 </resources>

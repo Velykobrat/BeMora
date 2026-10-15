@@ -45,12 +45,13 @@ class SearchViewModel(private val repository: CatalogRepository = ContentReposit
         searchJob = viewModelScope.launch {
             if (debounce) delay(500)
             try {
-                val result = repository.search(query, type)
-                if (version == requestVersion) {
-                    uiState = uiState.copy(results = result.items, isLoading = false,
-                        errorMessage = result.errors.entries.joinToString("\n") {
-                            it.key.label + ": " + it.value
-                        }.takeIf { it.isNotBlank() })
+                repository.searchUpdates(query, type).collect { result ->
+                    if (version == requestVersion) {
+                        uiState = uiState.copy(results = result.items, isLoading = result.loadingTypes.isNotEmpty(),
+                            errorMessage = result.errors.entries.joinToString("\n") {
+                                it.key.label + ": " + it.value
+                            }.takeIf { it.isNotBlank() })
+                    }
                 }
             } catch (exception: CancellationException) {
                 throw exception
