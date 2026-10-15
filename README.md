@@ -8,9 +8,13 @@ Android app for tracking movies, books and games, built with Kotlin and Jetpack 
 - Books: [Open Library](https://openlibrary.org/dev/docs/api/search), no API key required. Search is work-based, so editions of the same book share a Library entry. Results include authors, first publication year and covers; details add the work description.
 - Games: [RAWG](https://rawg.io/apidocs), requires your own API key. Results include release year, supported platforms and artwork; details add a description. RAWG ratings are converted from 0–5 to 0–10 for comparison with TMDB.
 
-Search provides All / Movies / Books / Games filters and the first page of up to 20 results per catalog. All searches retain successful results if another provider fails and show which catalog needs attention. Changing a query or category cancels the previous search. Successful queries are cached in memory for five minutes (up to 30 queries per repository). Open Library requests are serialized and limited to one per second.
+Search provides All / Movies / Books / Games filters and the first page of up to 20 results per catalog. All searches publish each catalog as soon as it finishes, while slower catalogs continue loading. Successful results stay visible when another catalog fails. Changing a query or category cancels the previous search. Successful queries are cached in memory for five minutes (up to 30 queries per repository). Open Library requests are serialized and limited to one per second.
 
-Saved entries support Planned / In progress / Completed / Dropped statuses. Library filters, title search and sorting work across all three types. Profile shows totals by type and status. Saved details remain available when a catalog cannot be reached. Existing version-1 movie Library data and old movie routes are preserved.
+Saved entries support Planned / In progress / Completed / Dropped statuses. Library filters, title search and sorting work across all three types. Profile shows totals by type and status. Saved details appear immediately and refresh in the background. Status edits and removal stay available during refresh; refresh responses preserve pending status choices and existing metadata when an optional field is missing. Book work details remain usable if the separate search index fails. Existing version-1 movie Library data and old movie routes are preserved.
+
+## Discover
+
+The home screen has independent shelves for popular TMDB movies, fiction books from the Open Library Subjects API, and popular RAWG games ordered by added count. Each shelf has its own loading, error and retry state; retries leave other shelves untouched. Cards open the shared details screen and can be added to Library. The page scrolls vertically. RAWG still requires the configured API key.
 
 ## Setup
 
@@ -30,6 +34,6 @@ Get your RAWG key from [RAWG API registration](https://rawg.io/apidocs). Without
 ./gradlew connectedDebugAndroidTest
 ```
 
-Unit tests cover provider dispatch, partial failures, cancellation, DTO mapping, ID validation, mixed Library persistence, legacy movie data, combined filters and Profile counts. Instrumented tests also verify saving, updating, removing and restoring movies, books and games through SharedPreferences.
+Unit tests cover provider dispatch, incremental search emissions, provider/collector cancellation, optional book metadata failures, immediate saved details, status edits/removal during refresh, independent Discover shelves and targeted retry, DTO mapping, ID validation, mixed/legacy persistence, Library filters and Profile counts. Instrumented tests also verify saving, updating, removing and restoring movies, books and games through SharedPreferences.
 
 On a device, search for a book and game, open each result, add it to Library, change its status, restart the app and verify the type filters and Profile counts. Test All search without a RAWG key to verify that other catalog results remain visible.

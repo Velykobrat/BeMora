@@ -14,13 +14,13 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-class LibraryRepository internal constructor(private val preferences: SharedPreferences) {
+class LibraryRepository internal constructor(private val preferences: SharedPreferences) : LibraryStore {
 
     private val mutex = Mutex()
     private val trackedItems = MutableStateFlow(readItems())
-    val items = trackedItems.asStateFlow()
+    override val items = trackedItems.asStateFlow()
 
-    suspend fun save(content: ContentItem, status: TrackingStatus) {
+    override suspend fun save(content: ContentItem, status: TrackingStatus) {
         require(CatalogId.isValid(content)) { "Only supported catalog items can be tracked" }
         update { current ->
             val tracked = TrackedContentItem(content, status)
@@ -32,7 +32,7 @@ class LibraryRepository internal constructor(private val preferences: SharedPref
         }
     }
 
-    suspend fun remove(contentId: String) {
+    override suspend fun remove(contentId: String) {
         update { current -> current.filterNot { it.content.id == contentId } }
     }
 

@@ -6,6 +6,7 @@ import com.bebetter.bemora.domain.model.TrackingStatus
 data class ContentDetailsUiState(
     val content: ContentItem? = null,
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val errorMessage: String? = null,
     val trackingStatus: TrackingStatus? = null,
     val selectedStatus: TrackingStatus = TrackingStatus.PLANNED,

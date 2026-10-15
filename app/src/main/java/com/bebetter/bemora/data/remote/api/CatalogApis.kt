@@ -1,5 +1,6 @@
 package com.bebetter.bemora.data.remote.api
 
+import com.bebetter.bemora.data.remote.dto.BookSubjectResponse
 import com.bebetter.bemora.data.remote.dto.BookSearchResponse
 import com.bebetter.bemora.data.remote.dto.BookWorkDto
 import com.bebetter.bemora.data.remote.dto.GameDto
@@ -16,6 +17,9 @@ interface OpenLibraryApi {
         @Query("limit") limit: Int = 20
     ): BookSearchResponse
 
+    @GET("subjects/{subject}.json")
+    suspend fun subject(@Path("subject") subject: String, @Query("limit") limit: Int = 20): BookSubjectResponse
+
     @GET("works/{workId}.json")
     suspend fun work(@Path("workId") workId: String): BookWorkDto
 }
@@ -25,6 +29,13 @@ interface RawgApi {
     suspend fun search(
         @Query("search") query: String,
         @Query("key") key: String,
+        @Query("page_size") pageSize: Int = 20
+    ): GameSearchResponse
+
+    @GET("games")
+    suspend fun popular(
+        @Query("key") key: String,
+        @Query("ordering") ordering: String = "-added",
         @Query("page_size") pageSize: Int = 20
     ): GameSearchResponse
 

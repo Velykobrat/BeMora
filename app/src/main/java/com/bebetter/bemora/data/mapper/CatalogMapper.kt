@@ -1,5 +1,6 @@
 package com.bebetter.bemora.data.mapper
 
+import com.bebetter.bemora.data.remote.dto.SubjectBookDto
 import com.bebetter.bemora.data.remote.dto.BookDto
 import com.bebetter.bemora.data.remote.dto.BookWorkDto
 import com.bebetter.bemora.data.remote.dto.GameDto
@@ -57,3 +58,7 @@ fun GameDto.toContentItemOrNull(): ContentItem? {
     )
     return item.takeIf { CatalogId.isValid(it) }
 }
+
+fun SubjectBookDto.toContentItemOrNull(): ContentItem? = BookDto(
+    key = key, title = title, authors = authors?.mapNotNull { it?.name }, year = year, coverId = coverId
+).toContentItemOrNull()

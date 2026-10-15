@@ -1,37 +1,12 @@
 package com.bebetter.bemora.ui.discover
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bebetter.bemora.data.repository.ContentRepository
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.launch
+import com.bebetter.bemora.domain.model.ContentType
 
 class DiscoverViewModel : ViewModel() {
-
-    private val repository = ContentRepository()
-
-    var uiState by mutableStateOf(DiscoverUiState(isLoading = true))
-        private set
-
-    init {
-        viewModelScope.launch {
-            try {
-                val movies = repository.getPopularMovies()
-                uiState = uiState.copy(
-                    movies = movies,
-                    isLoading = false
-                )
-            } catch (exception: CancellationException) {
-                throw exception
-            } catch (exception: Exception) {
-                uiState = uiState.copy(
-                    isLoading = false,
-                    errorMessage = exception.message ?: "Unable to load popular movies"
-                )
-            }
-        }
-    }
+    private val controller = DiscoverController(ContentRepository(), viewModelScope)
+    val uiState = controller.uiState
+    fun retry(type: ContentType) = controller.load(type)
 }

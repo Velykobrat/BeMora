@@ -13,8 +13,13 @@ import com.bebetter.bemora.domain.model.CatalogId
 import com.bebetter.bemora.domain.model.ContentItem
 import com.bebetter.bemora.domain.model.ContentType
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.async
-import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class ContentRepository(
     private val movieApi: TmdbApi = TmdbClient.api,
@@ -22,7 +27,7 @@ class ContentRepository(
     private val gamesApi: RawgApi = CatalogClients.games,
     private val tmdbToken: String = BuildConfig.TMDB_TOKEN,
     private val gameKey: String = BuildConfig.RAWG_API_KEY
-) : CatalogRepository {
+) : CatalogRepository, DiscoverRepository {
     private data class CachedSearch(val timestamp: Long, val items: List<ContentItem>)
     private val searches = linkedMapOf<Pair<ContentType, String>, CachedSearch>()
 
@@ -51,24 +56,55 @@ class ContentRepository(
         if (query.isBlank()) emptyList() else movieApi.searchMovies(query).results.map { it.toContentItem() }
 
     override suspend fun search(query: String, type: ContentType?): CatalogSearchResult {
-        if (query.isBlank()) return CatalogSearchResult()
+        val result = searchUpdates(query, type).last()
+        return CatalogSearchResult(result.items, result.errors)
+    }
+
+    override fun searchUpdates(query: String, type: ContentType?): Flow<CatalogSearchProgress> = channelFlow {
         require(type == null || type in CatalogId.supportedTypes)
-        val types = type?.let { listOf(it) } ?: CatalogId.supportedTypes
-        return supervisorScope {
-            val results = types.map { category ->
-                async {
-                    try {
-                        CatalogSearchResult(items = cachedSearch(query.trim(), category))
-                    } catch (exception: CancellationException) {
-                        throw exception
-                    } catch (exception: Exception) {
-                        CatalogSearchResult(errors = mapOf(category to catalogErrorMessage(exception)))
-                    }
-                }
-            }.map { it.await() }
-            CatalogSearchResult(results.flatMap { it.items }.distinctBy { it.id },
-                results.flatMap { it.errors.entries }.associate { it.toPair() })
+        if (query.isBlank()) {
+            send(CatalogSearchProgress())
+            return@channelFlow
         }
+        val types = type?.let { listOf(it) } ?: CatalogId.supportedTypes
+        val pending = types.toMutableSet()
+        val items = mutableMapOf<ContentType, List<ContentItem>>()
+        val errors = mutableMapOf<ContentType, String>()
+        val mutex = Mutex()
+        send(CatalogSearchProgress(loadingTypes = pending.toSet()))
+        types.forEach { category ->
+            launch {
+                val result = try {
+                    CatalogSearchResult(items = cachedSearch(query.trim(), category))
+                } catch (exception: CancellationException) {
+                    this@channelFlow.cancel("Catalog search cancelled", exception)
+                    throw exception
+                } catch (exception: Exception) {
+                    CatalogSearchResult(errors = mapOf(category to catalogErrorMessage(exception)))
+                }
+                mutex.withLock {
+                    items[category] = result.items
+                    errors.putAll(result.errors)
+                    pending.remove(category)
+                    send(CatalogSearchProgress(
+                        items = types.flatMap { items[it].orEmpty() }.distinctBy { it.id },
+                        errors = types.mapNotNull { source -> errors[source]?.let { source to it } }.toMap(),
+                        loadingTypes = pending.toSet()
+                    ))
+                }
+            }
+        }
+    }
+
+    override suspend fun getDiscoverItems(type: ContentType): List<ContentItem> = when (type) {
+        ContentType.MOVIE -> {
+            if (tmdbToken.isBlank()) throw CatalogConfigurationException("Movie catalog is not configured.")
+            getPopularMovies()
+        }
+        ContentType.BOOK -> CatalogClients.bookRequest { booksApi.subject("fiction") }
+            .works.orEmpty().mapNotNull { it.toContentItemOrNull() }
+        ContentType.GAME -> gamesApi.popular(rawgKey()).results.orEmpty().mapNotNull { it.toContentItemOrNull() }
+        else -> error("Unsupported catalog")
     }
 
     private suspend fun searchCategory(query: String, type: ContentType): List<ContentItem> = when (type) {
@@ -87,10 +123,16 @@ class ContentRepository(
         ContentType.MOVIE -> getMovieDetails(id.removePrefix("tmdb_movie_").toInt())
         ContentType.BOOK -> {
             val workId = id.removePrefix("openlibrary_book_")
-            val summary = CatalogClients.bookRequest {
-                booksApi.search("key:/works/" + workId, limit = 1)
-            }.docs.orEmpty().mapNotNull { it.toContentItemOrNull() }.firstOrNull { it.id == id }
+            // Work details remain usable when the separate search index is unavailable.
             val work = CatalogClients.bookRequest { booksApi.work(workId) }
+            val summary = try {
+                CatalogClients.bookRequest { booksApi.search("key:/works/" + workId, limit = 1) }
+                    .docs.orEmpty().mapNotNull { it.toContentItemOrNull() }.firstOrNull { it.id == id }
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (_: Exception) {
+                null
+            }
             work.withSummary(summary ?: ContentItem(id = id,
                 title = work.title?.takeIf { it.isNotBlank() } ?: error("Book title is missing"),
                 type = ContentType.BOOK))
